@@ -12,57 +12,38 @@ public class model {
 	double[][] price;
 	//calculated data
 	double[][] correlation_matrix;
+	double[][] return_month;
 	double[] monthly_variance;
+	double[] monthly_volatility;
+	double[] annual_volatility;
 	double[] monthly_avg_return;
-
-	double returnMonth(int i, int j) {
-		return (price[i][j+1] - price[i][j])/price[i][j]*100;
-	}
+	double[] annual_avg_return;
 
 	double monthlyAvgReturn(int i) {
 		double d = 0;
 		for(int j = 0; j < months-1; ++j) {
-			d += returnMonth(i,j);
+			d += return_month[i][j];
 		}
 		return d / (months-1);
-	}
-
-	double annualAvgReturn(int i) {
-		return monthly_avg_return[i]*12;
 	}
 
 	double monthlyVariance(int i) {
 		double var = 0;
 		double mar = monthly_avg_return[i];
 		for(int j = 0; j < months-1; ++j) {
-			double d = returnMonth(i,j)-mar;
+			double d = return_month[i][j]-mar;
 			var += d*d;
 		}
 		return var / months-1;
 	}
 
-	double monthlyVolatility(int i) {
-		return Math.sqrt(monthly_variance[i]);
-	}
-
-	double annualVariance(int i) {
-		return monthly_variance[i]*12;
-	}
-
-	double annualVolatility(int i) {
-		return Math.sqrt(annualVariance(i));
-	}
-
 	double[][] correlationMatrix() {
-		double[] vol = new double[companies];
-		for(int i = 0; i < companies; ++i)
-			vol[i] = monthlyVolatility(i);
 		double[][] V = new double[companies][months-1];
 		double[][] M = new double[companies][companies];
 		for(int i = 0; i < companies; ++i) {
 			double mar = monthly_avg_return[i];
 			for(int j = 0; j < months-1; ++j)
-				V[i][j] = returnMonth(i,j)-mar;
+				V[i][j] = return_month[i][j]-mar;
 		}
 		for(int i = 0; i < companies; ++i) {
 			M[i][i] = 1;
@@ -70,11 +51,22 @@ public class model {
 				for(int k = 0; k < months-1; ++k) {
 					M[i][j] += V[i][k] * V[j][k];
 				}
-				M[i][j] /= vol[i]*vol[j];
+				M[i][j] /= monthly_volatility[i]*monthly_volatility[j];
 				M[j][i] = M[i][j];
 			}
 		}
 		return M;
+	}
+
+	double ratio(String c1, String c2, double p) {
+		int i=0,j=0;
+		for(int k = 0; k < companies; ++k) {
+			if(names[k].equals(c1))
+				i = k;
+			if(names[k].equals(c2))
+				j = k;
+		}
+		return Math.sqrt(p*p*annual_volatility[i] + (1-p)*(1-p)*annual_volatility[j] + 2*p*(1-p)*correlation_matrix[i][j]*annual_volatility[i]*annual_volatility[j]);
 	}
 
 	double get_w(double[] c) {
@@ -119,6 +111,10 @@ public class model {
 		return c;
 	}
 
+	public static void main(String[] args) {
+		model m = new model();
+	}
+
 	public model() {
 		try {
 			Scanner s = new Scanner(new File("data.txt"));
@@ -139,12 +135,26 @@ public class model {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+		return_month = new double[companies][months-1];
 		monthly_avg_return = new double[companies];
-		for(int i = 0; i < companies; ++i)
-			monthly_avg_return[i] = monthlyAvgReturn(i);
+		annual_avg_return = new double[companies];
 		monthly_variance = new double[companies];
-		for(int i = 0; i < companies; ++i)
+		annual_volatility = new double[companies];
+		for(int i = 0; i < companies; ++i) {
+			for(int j = 0; j < months-1; ++j)
+				return_month[i][j] = (price[i][j+1] - price[i][j])/price[i][j]*100;
+		}
+		for(int i = 0; i < companies; ++i) {
+			monthly_avg_return[i] = monthlyAvgReturn(i);
+			annual_avg_return[i] = monthly_avg_return[i]*12;
+		}
+		for(int i = 0; i < companies; ++i) {
 			monthly_variance[i] = monthlyVariance(i);
+			monthly_volatility[i] = Math.sqrt(monthly_variance[i]);
+			annual_volatility[i] = Math.sqrt(monthly_variance[i]*12);
+		}
 		correlation_matrix = correlationMatrix();
+
+		System.out.println(ratio("APPL", "FORD", 0.3));
 	}
 }
