@@ -140,6 +140,7 @@ public class model {
 		annual_avg_return = new double[companies];
 		monthly_variance = new double[companies];
 		annual_volatility = new double[companies];
+		monthly_volatility = new double[companies];
 		for(int i = 0; i < companies; ++i) {
 			for(int j = 0; j < months-1; ++j)
 				return_month[i][j] = (price[i][j+1] - price[i][j])/price[i][j]*100;
@@ -154,7 +155,5 @@ public class model {
 			annual_volatility[i] = Math.sqrt(monthly_variance[i]*12);
 		}
 		correlation_matrix = correlationMatrix();
-
-		System.out.println(ratio("APPL", "FORD", 0.3));
 	}
 }
