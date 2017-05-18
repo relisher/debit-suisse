@@ -5,16 +5,21 @@ import java.io.File;
 import java.io.IOException;
 
 public class model {
+	
+	//given data
+	int companies, months;
+	String[] names;
+	double[][] price;
+	//calculated data
+	double[][] correlation_matrix;
+	double[] monthly_variance;
+	double[] monthly_avg_return;
 
-	static int companies, months;
-	static String[] names;
-	static double[][] price;
-
-	static double returnMonth(int i, int j) {
+	double returnMonth(int i, int j) {
 		return (price[i][j+1] - price[i][j])/price[i][j]*100;
 	}
 
-	static double monthlyAvgReturn(int i) {
+	double monthlyAvgReturn(int i) {
 		double d = 0;
 		for(int j = 0; j < months-1; ++j) {
 			d += returnMonth(i,j);
@@ -22,13 +27,13 @@ public class model {
 		return d / (months-1);
 	}
 
-	static double annualAvgReturn(int i) {
-		return monthlyAvgReturn(i)*12;
+	double annualAvgReturn(int i) {
+		return monthly_avg_return[i]*12;
 	}
 
-	static double monthlyVariance(int i) {
+	double monthlyVariance(int i) {
 		double var = 0;
-		double mar = monthlyAvgReturn(i);
+		double mar = monthly_avg_return[i];
 		for(int j = 0; j < months-1; ++j) {
 			double d = returnMonth(i,j)-mar;
 			var += d*d;
@@ -36,26 +41,26 @@ public class model {
 		return var / months-1;
 	}
 
-	static double monthlyVolatility(int i) {
-		return Math.sqrt(monthlyVariance(i));
+	double monthlyVolatility(int i) {
+		return Math.sqrt(monthly_variance[i]);
 	}
 
-	static double annualVariance(int i) {
-		return monthlyVariance(i)*12;
+	double annualVariance(int i) {
+		return monthly_variance[i]*12;
 	}
 
-	static double annualVolatility(int i) {
+	double annualVolatility(int i) {
 		return Math.sqrt(annualVariance(i));
 	}
 
-	static double[][] correlationMatrix() {
+	double[][] correlationMatrix() {
 		double[] vol = new double[companies];
 		for(int i = 0; i < companies; ++i)
 			vol[i] = monthlyVolatility(i);
 		double[][] V = new double[companies][months-1];
 		double[][] M = new double[companies][companies];
 		for(int i = 0; i < companies; ++i) {
-			double mar = monthlyAvgReturn(i);
+			double mar = monthly_avg_return[i];
 			for(int j = 0; j < months-1; ++j)
 				V[i][j] = returnMonth(i,j)-mar;
 		}
@@ -67,20 +72,19 @@ public class model {
 				}
 				M[i][j] /= vol[i]*vol[j];
 				M[j][i] = M[i][j];
-
 			}
 		}
 		return M;
 	}
 
-	static double get_w(double[] c) {
+	double get_w(double[] c) {
 		double w = 1;
 		for(double r : c)
 			w -= r;
 		return w;
 	}
 
-	static void project(double[] c) {
+	void project(double[] c) {
 		for(int i = 0; i < companies-1; ++i)
 			if(c[i] < 0)
 				c[i] = 0;
@@ -92,7 +96,7 @@ public class model {
 				c[i] /= sm;
 	}
 
-	static double[] gradientDescent(double[] r, double[] v, int steps, double alpha) {
+	double[] gradientDescent(double[] r, double[] v, int steps, double alpha) {
 		//generate initial configuration
 		double[] c = new double[companies-1];
 		// double s = Math.random();
@@ -116,36 +120,31 @@ public class model {
 	}
 
 	public model() {
-                try {
-                   Scanner s = new Scanner(new File("data.txt"));
-                    companies = s.nextInt();
-                    months = s.nextInt();
+		try {
+			Scanner s = new Scanner(new File("data.txt"));
+			companies = s.nextInt();
+			months = s.nextInt();
 
-                    names = new String[companies];
-                    price = new double[companies][months];
+			names = new String[companies];
+			price = new double[companies][months];
 
-                    for(int i = 0; i < companies; ++i) {
-			for(int j = 0; j < months; ++j) {
-				names[i] = s.next();
-				s.next();
-				price[i][j] = s.nextDouble();
+			for(int i = 0; i < companies; ++i) {
+				for(int j = 0; j < months; ++j) {
+					names[i] = s.next();
+					s.next();
+					price[i][j] = s.nextDouble();
+				}
 			}
-                    }
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-		double[] r = new double[companies],v = new double[companies];
-		for(int i = 0; i < companies; ++i) {
-			r[i] = annualAvgReturn(i);
-			v[i] = annualVariance(i);
 		}
-
-		double[] c = gradientDescent(r,v,1,0.01);
-		for(int i = 0; i < companies-1; ++i) {
-			System.out.println(c[i]);
+		catch (IOException e) {
+			e.printStackTrace();
 		}
-		System.out.println(get_w(c));
+		monthly_avg_return = new double[companies];
+		for(int i = 0; i < companies; ++i)
+			monthly_avg_return[i] = monthlyAvgReturn(i);
+		monthly_variance = new double[companies];
+		for(int i = 0; i < companies; ++i)
+			monthly_variance[i] = monthlyVariance(i);
+		correlation_matrix = correlationMatrix();
 	}
 }
