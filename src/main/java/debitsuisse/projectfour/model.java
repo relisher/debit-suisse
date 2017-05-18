@@ -160,9 +160,8 @@ public class model {
 
 		for(int i = 0; i < companies; ++i) {
 			for(int j = 0; j < companies; ++j) {
-				System.out.print(df.format(correlation_matrix[i][j]) + " ");
+				System.out.println(names[i] + ", " + names[j] + " -> "df.format(correlation_matrix[i][j]));
 			}
-			System.out.println();
 		}
 	}
 }
