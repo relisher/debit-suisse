@@ -1,8 +1,10 @@
+package debitsuisse.projectfour;
+
 import java.util.Scanner;
 import java.io.File;
 import java.io.IOException;
 
-public class Main {
+public class model {
 
 	static int companies, months;
 	static String[] names;
@@ -56,30 +58,35 @@ public class Main {
 				for(int k = 0; k < months-1; ++k) {
 					M[i][j] += V[i][k] * V[j][k];
 				}
+                            M[j][i] = M[i][j];
 			}
-			M[j][i] = M[i][j];
 		}
 		return M;
 	}
 
-	double gradientDescent(double[] ) {
-		
+	double gradientDescent(double[] inputValue) {
+		return 0.0;
 	}
 
-	public static void main(String[] args) throws Exception {
-		Scanner s = new Scanner(new File("data.txt"));
-		companies = s.nextInt();
-		months = s.nextInt();
+	public model() {
+                try {
+                   Scanner s = new Scanner(new File("data.txt"));
+                    companies = s.nextInt();
+                    months = s.nextInt();
 
-		names = new String[companies];
-		price = new double[companies][months];
+                    names = new String[companies];
+                    price = new double[companies][months];
 
-		for(int i = 0; i < companies; ++i) {
+                    for(int i = 0; i < companies; ++i) {
 			for(int j = 0; j < months; ++j) {
 				names[i] = s.next();
 				s.next();
 				price[i][j] = s.nextDouble();
 			}
-		}
+                    }
+             }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
 	}
 }

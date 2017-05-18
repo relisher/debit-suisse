@@ -5,6 +5,7 @@
  */
 package debitsuisse.projectfour;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,11 +20,14 @@ public class MoneyManagerController {
     
     exampleClass eC = new exampleClass();
     
+    model m = new model();
+    
     @RequestMapping("/getData")
     public String managerData() {
-       return eC.initialize();
+       return m.test();
     }
     
+    @CrossOrigin(origins = "*")
     @RequestMapping(method = {RequestMethod.GET}, value="/getProportion")
     public String stockProportion(@RequestParam(value = "proportion", 
             defaultValue="50.0") Double userCash)
