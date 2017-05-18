@@ -160,7 +160,7 @@ public class model {
 			for(int j = 0; j < companies; ++j) {
 				System.out.print(correlation_matrix[i][j] + " ");
 			}
-			System.out.println("\n");
+			System.out.println();
 		}
 	}
 }
