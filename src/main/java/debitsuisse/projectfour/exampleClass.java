@@ -3,12 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package debitsuisse.projectour;
+package debitsuisse.projectfour;
 
 /**
  *
  * @author arelin
  */
-public class Application {
+public class exampleClass {
+    
+    public static String initialize() {
+        return "Hello, World!";
+    }
     
 }
