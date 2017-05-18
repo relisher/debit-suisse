@@ -24,7 +24,7 @@ public class MoneyManagerController {
     
     @RequestMapping("/getData")
     public String managerData() {
-       return m.test();
+       return "test";
     }
     
     @CrossOrigin(origins = "*")
