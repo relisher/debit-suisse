@@ -39,7 +39,7 @@ public class model {
 	}
 
 	static double annualVariance(int i) {
-		return monthlyVolatility(i)*12;
+		return monthlyVariance(i)*12;
 	}
 
 	static double annualVolatility(int i) {
