@@ -155,5 +155,12 @@ public class model {
 			annual_volatility[i] = Math.sqrt(monthly_variance[i]*12);
 		}
 		correlation_matrix = correlationMatrix();
+
+		for(int i = 0; i < companies; ++i) {
+			for(int j = 0; j < companies; ++j) {
+				System.out.print(correlation_matrix[i][j] + " ");
+			}
+			System.out.println("\n");
+		}
 	}
 }
