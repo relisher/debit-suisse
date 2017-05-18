@@ -11,7 +11,7 @@ package debitsuisse.projectfour;
  */
 public class exampleClass {
     
-    public static String initialize() {
+    public String initialize() {
         return "Hello, World!";
     }
     

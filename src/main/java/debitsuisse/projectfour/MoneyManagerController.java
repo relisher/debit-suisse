@@ -6,6 +6,8 @@
 package debitsuisse.projectfour;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -21,5 +23,14 @@ public class MoneyManagerController {
     public String managerData() {
        return eC.initialize();
     }
+    
+    @RequestMapping(method = {RequestMethod.GET}, value="/getProportion")
+    public String stockProportion(@RequestParam(value = "proportion", 
+            defaultValue="50.0") Double userCash)
+    {
+        return eC.initialize() + userCash;
+    }
+    
+    
     
 }
