@@ -141,10 +141,9 @@ public class model {
 		monthly_variance = new double[companies];
 		annual_volatility = new double[companies];
 		monthly_volatility = new double[companies];
-		for(int i = 0; i < companies; ++i) {
+		for(int i = 0; i < companies; ++i)
 			for(int j = 0; j < months-1; ++j)
 				return_month[i][j] = (price[i][j+1] - price[i][j])/price[i][j]*100;
-		}
 		for(int i = 0; i < companies; ++i) {
 			monthly_avg_return[i] = monthlyAvgReturn(i);
 			annual_avg_return[i] = monthly_avg_return[i]*12;
@@ -156,9 +155,12 @@ public class model {
 		}
 		correlation_matrix = correlationMatrix();
 
+		DecimalFormat df = new DecimalFormat(".00");
+
+
 		for(int i = 0; i < companies; ++i) {
 			for(int j = 0; j < companies; ++j) {
-				System.out.print(correlation_matrix[i][j] + " ");
+				System.out.print(df.format(correlation_matrix[i][j]) + " ");
 			}
 			System.out.println();
 		}
