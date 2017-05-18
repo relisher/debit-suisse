@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MoneyManagerController {
     
+    exampleClass eC = new exampleClass();
+    
     @RequestMapping("/getData")
     public String managerData() {
-       return new String(exampleClass.initialize());
+       return eC.initialize();
     }
     
 }
