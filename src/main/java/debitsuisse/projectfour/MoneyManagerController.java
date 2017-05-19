@@ -72,8 +72,8 @@ public class MoneyManagerController {
             defaultValue="F") String companyTwo)
     {
         double applRatio = (userCash) / 100.0;
-        double income = (m.annualAvgReturn(companyOne) * applRatio) + 
-                (m.annualAvgReturn(companyTwo) * (1-applRatio))*100;
+        double income = ((m.annualAvgReturn(companyOne) * applRatio) + 
+                (m.annualAvgReturn(companyTwo) * (1-applRatio)))*100;
         return Json.createObjectBuilder()
             .add("aVol", Double.toString(m.ratio(companyOne, companyTwo, applRatio)))
             .add("aRet", Double.toString(income))
