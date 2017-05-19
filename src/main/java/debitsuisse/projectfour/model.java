@@ -5,11 +5,12 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.Map;
 
 public class model {
 	
 	//given data
-	HashMap<String,Integer> indices;
+	static Map<String,Integer> indices = new HashMap<>();;
 	int companies, months;
 	String[] names;
 	double[][] price;
@@ -29,6 +30,16 @@ public class model {
 		}
 		return d / (months-1);
 	}
+        
+        public double annualAvgReturn(String c1) {
+            System.out.println(c1 + " this is the value");
+            int i=indices.get(c1);
+            double d = 0;
+            for(int j = 0; j < months-1; ++j) {
+			d += return_month[i][j];
+            }
+            return (d / (months-1)) * 12;
+        }
 
 	double monthlyVariance(int i) {
 		double var = 0;
@@ -74,7 +85,7 @@ public class model {
 		return ans;
 	}
 
-	double[] gradientDescent(double[] r, double[] v, int steps, double alpha) {
+	/*double[] gradientDescent(double[] r, double[] v, int steps, double alpha) {
 		double[] c = new double[companies-1];
 		for(; steps>0; --steps) {
 			double w = get_w(c);
@@ -87,7 +98,7 @@ public class model {
 			project(c);
 		}
 		return c;
-	}
+	}*/
 
 	public static void main(String[] args) {
 		model m = new model();

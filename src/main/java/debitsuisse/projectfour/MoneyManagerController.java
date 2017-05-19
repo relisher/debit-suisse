@@ -5,6 +5,7 @@
  */
 package debitsuisse.projectfour;
 
+import javax.json.Json;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -32,7 +33,13 @@ public class MoneyManagerController {
     public String stockProportion(@RequestParam(value = "proportion", 
             defaultValue="50.0") Double userCash)
     {
-        return eC.initialize() + userCash;
+        double applRatio = (100.0 - userCash) / 100.0;
+        double income = (m.annualAvgReturn("AAPL") * applRatio) + (m.annualAvgReturn("F") * (1-applRatio));
+        return Json.createObjectBuilder()
+            .add("aVol", Double.toString(m.ratio("AAPL", "F", applRatio)))
+            .add("aRet", Double.toString(income))
+            .build()
+            .toString();
     }
     
     
