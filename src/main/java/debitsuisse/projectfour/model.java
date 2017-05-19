@@ -30,8 +30,7 @@ public class model {
 			d += return_month[i][j];
 		}
 		return d / (months-1);
-	}
-        
+	} 
 
     public double annualAvgReturn(String c1) {
         return annual_avg_return[indices.get(c1)];
@@ -51,26 +50,27 @@ public class model {
 		return var / (months-1);
 	}
         
-        public double[][] getCorrelationMatrix() {
-            return correlation_matrix;
-        }
-        
-        public double annualVariance(String c1) {
-            int i=indices.get(c1);
-            return monthlyVariance(i) * Math.sqrt(12.0);
-        }
-        
-        public int getCompanyValue(String c1) {
-            return indices.get(c1);
-        }
+    public double[][] getCorrelationMatrix() {
+        return correlation_matrix;
+    }
+    
+    public double annualVariance(String c1) {
+        int i=indices.get(c1);
+        return monthlyVariance(i) * Math.sqrt(12.0);
+    }
+    
+    public int getCompanyValue(String c1) {
+        return indices.get(c1);
+    }
 
 	double[][] correlationMatrix() {
 		double[][] V = new double[companies][months-1];
 		double[][] M = new double[companies][companies];
 		for(int i = 0; i < companies; ++i) {
 			double mar = monthly_avg_return[i];
-			for(int j = 0; j < months-1; ++j)
+			for(int j = 0; j < months-1; ++j) {
 				V[i][j] = return_month[i][j]-mar;
+			}
 		}
 		for(int i = 0; i < companies; ++i) {
 			M[i][i] = 1;
@@ -85,14 +85,17 @@ public class model {
 		return M;
 	}
 
+	//calculate the volatility given your portfolio consists of
+	//p of company c1 and (1-p) of company c2
 	double ratio(String c1, String c2, double p) {
-            int i=indices.get(c1),j=indices.get(c2);
-            return Math.sqrt(p*p*annual_volatility[i]*annual_volatility[i] + 
-                    (1-p)*(1-p)*annual_volatility[j]*annual_volatility[j] + 
-                    2*p*(1-p)*correlation_matrix[i][j]*
-                            annual_volatility[i]*annual_volatility[j]);
-        }
+        int i=indices.get(c1),j=indices.get(c2);
+        return Math.sqrt(p*p*annual_volatility[i]*annual_volatility[i] + 
+                (1-p)*(1-p)*annual_volatility[j]*annual_volatility[j] + 
+                2*p*(1-p)*correlation_matrix[i][j]*
+                        annual_volatility[i]*annual_volatility[j]);
+    }
 
+    //return paired volatility for all percentages 0,1,2,...,99,100
 	double[] allRatios(String c1, String c2) {
 		double[] ans = new double[101];
 		for(int i = 0; i <= 100; ++i) {
@@ -100,16 +103,18 @@ public class model {
 		}
 		return ans;
 	}
-        
-        double[] allReturns(String c1, String c2) {
-            double[] ans = new double[101];
-            for(int i = 0; i <= 100; i++) {
-                ans[i] = (annualAvgReturn(c1) * i/100.0) + (annualAvgReturn(c2) * (100-1)/100.0);
-            }
-            return ans;
+    
+	//paired returns for all percentages 0,1,2,...,99,100
+    double[] allReturns(String c1, String c2) {
+        double[] ans = new double[101];
+        for(int i = 0; i <= 100; i++) {
+            ans[i] = (annualAvgReturn(c1) * i/100.0) + (annualAvgReturn(c2) * (100-i)/100.0);
         }
+        return ans;
+    }
 
-	private double sample_return(double[] c) {
+    //the return value of a specific weighting c
+	private double weightingReturn(double[] c) {
 		double ret = 0, w = 1;
 		for(int i = 0; i < companies-1; ++i) {
 			w -= c[i];
@@ -118,7 +123,8 @@ public class model {
 		return ret+w*annual_avg_return[companies-1];
 	}
 
-	private boolean sample_ok(double[] c, double cutoff) {
+	//does the weighting fit the constraints?
+	private boolean weightingOk(double[] c, double cutoff) {
 		double payoff = 0;
 		double w = 1;
 		for(int i = 0; i < companies-1; ++i) {
@@ -130,7 +136,8 @@ public class model {
 		return payoff >= cutoff;
 	}
 
-	private double sample_variance(double[] c) {
+	//the variance of a specific weighting c
+	private double weightingVariance(double[] c) {
 		double var = 0;
 		double w = 1;
 		for(int i = 0; i < companies-1; ++i) {
@@ -143,18 +150,21 @@ public class model {
 				var += 2*c[i]*c[j]*Math.sqrt(annual_variance[i]*annual_variance[j])*correlation_matrix[i][j];
 			}
 		}
-		for(int j = 0; j < companies-1; ++j)
+		for(int j = 0; j < companies-1; ++j) {
 			var += 2*c[j]*w*Math.sqrt(annual_variance[j]*annual_variance[companies-1])*correlation_matrix[j][companies-1];
+		}
 		return var;
 	}
 
+	//sample randomly and gradient descent to find minima
 	double[] gradientDescent(double cutoff, int steps, double alpha) {
 		double[] c = new double[companies-1],cs = new double[companies-1];
 		//find feasible solution
 		int mx = 0;
 		for(int i = 1; i < annual_avg_return.length; ++i) {
-			if(annual_avg_return[mx] < annual_avg_return[i])
+			if(annual_avg_return[mx] < annual_avg_return[i]) {
 				mx = i;
+			}
 		}
 		if(annual_avg_return[mx] < cutoff) {
 			//no solutions exist
@@ -171,17 +181,16 @@ public class model {
 			for(int i = 0; i < companies-1; ++i) {
 				c[i] *= s/w;
 			}
-		} while(!sample_ok(c,cutoff));
-
+		} while(!weightingOk(c,cutoff));
 
 		//local search
-		double best_var = sample_variance(c);
+		double best_var = weightingVariance(c);
 		for(int i = steps; i > 0; --i) {
 			double rate = alpha;
 			for(int j = 0; j < companies-1; ++j)
 				cs[j] = c[j] + rate*(Math.random()*2-1);
-			if(sample_ok(cs,cutoff)) {
-				double var = sample_variance(cs);
+			if(weightingOk(cs,cutoff)) {
+				double var = weightingVariance(cs);
 				if(var < best_var) {
 					best_var = var;
 					c = cs;
@@ -193,12 +202,11 @@ public class model {
 
 	double[] learn_model(double cutoff) {
 		double[] c = new double[companies-1],cw;
-		double c_var = sample_variance(c);
+		double c_var = weightingVariance(c);
 		c[0] = -1;
 		for(int i = 0; i < 2000; ++i) {
 			cw = gradientDescent(cutoff,1000,0.05);
-			double cw_var = sample_variance(cw);
-			// System.out.println("Volatility: " + Math.sqrt(cw_var));
+			double cw_var = weightingVariance(cw);
 			if(c[0] == -1 || cw_var < c_var) {
 				c_var = cw_var;
 				c = cw;
@@ -234,6 +242,7 @@ public class model {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+		//precalculate lots of info
 		return_month = new double[companies][months-1];
 		monthly_avg_return = new double[companies];
 		annual_avg_return = new double[companies];
@@ -246,7 +255,7 @@ public class model {
 				return_month[i][j] = (price[i][j+1] - price[i][j])/price[i][j]*100;
 		for(int i = 0; i < companies; ++i) {
 			monthly_avg_return[i] = monthlyAvgReturn(i);
-			annual_avg_return[i] = Math.pow(1+monthly_avg_return[i],12)-1;
+			annual_avg_return[i] = Math.pow(1+monthly_avg_return[i]/100,12)*100-100;
 		}
 		for(int i = 0; i < companies; ++i) {
 			monthly_variance[i] = monthlyVariance(i);
@@ -256,6 +265,6 @@ public class model {
 		}
 		correlation_matrix = correlationMatrix();
 
-		learn_model(0.12);
+		//learn_model(0.12);
 	}
 }
