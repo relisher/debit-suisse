@@ -200,6 +200,7 @@ public class model {
 		return c;
 	}
 
+	//learn weightings with return at least cutoff
 	double[] learn_model(double cutoff) {
 		double[] c = new double[companies-1],cw;
 		double c_var = weightingVariance(c);
