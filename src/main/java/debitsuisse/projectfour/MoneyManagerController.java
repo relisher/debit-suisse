@@ -5,7 +5,6 @@
  */
 package debitsuisse.projectfour;
 
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
@@ -56,10 +55,10 @@ public class MoneyManagerController {
         }
         
         return Json.createObjectBuilder()
-                .add("mar", Double.toString(m.monthlyAvgReturn(m.getCompanyValue(stock))))
-                .add("aar", Double.toString(m.annualAvgReturn(stock)))
-                .add("mv", Double.toString(m.monthlyVariance(m.getCompanyValue(stock))))
-                .add("av", Double.toString(m.annualVariance(stock)))
+                .add("mar", Double.toString(m.monthlyAvgReturn(m.getCompanyValue(stock))*100))
+                .add("aar", Double.toString(m.annualAvgReturn(stock)*100))
+                .add("mv", Double.toString(m.monthlyVolatility(stock)*100))
+                .add("av", Double.toString(m.annualVolatility(stock)*100))
                 .add("cf", createArrayBuilder).build().toString();
                 
     }
@@ -73,7 +72,8 @@ public class MoneyManagerController {
             defaultValue="F") String companyTwo)
     {
         double applRatio = (userCash) / 100.0;
-        double income = (m.annualAvgReturn(companyOne) * applRatio) + (m.annualAvgReturn(companyTwo) * (1-applRatio));
+        double income = (m.annualAvgReturn(companyOne) * applRatio) + 
+                (m.annualAvgReturn(companyTwo) * (1-applRatio))*100;
         return Json.createObjectBuilder()
             .add("aVol", Double.toString(m.ratio(companyOne, companyTwo, applRatio)))
             .add("aRet", Double.toString(income))
@@ -108,8 +108,8 @@ public class MoneyManagerController {
         }
         NumberFormat formatter = new DecimalFormat("#0.00");  
         double avgProfit = m.weightingReturn(learnModel);
-        return jsonObject.add("aar", avgProfit)
-                .add("av", m.weightingVolatility(learnModel))
+        return jsonObject.add("aar", avgProfit*100)
+                .add("av", m.weightingVolatility(learnModel)*100)
                 .add("ep", formatter.format(avgProfit * 10000000))
                 .add("pu", arrayBuilder)
                 .build().toString();

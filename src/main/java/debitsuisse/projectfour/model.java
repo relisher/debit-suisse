@@ -33,7 +33,7 @@ public class model {
 	} 
 
     public double annualAvgReturn(String c1) {
-        return annual_avg_return[indices.get(c1)]*100;
+        return annual_avg_return[indices.get(c1)];
     }
     
     public String[] getNames() {
@@ -54,8 +54,12 @@ public class model {
         return correlation_matrix;
     }
     
+    public double monthlyVolatility(String c1) {
+        return monthly_volatility[getCompanyValue(c1)];
+    }
+    
     public double annualVolatility(String c1) {
-        return annual_volatility[i]*100;
+        return annual_volatility[getCompanyValue(c1)];
     }
     
     public int getCompanyValue(String c1) {
@@ -91,7 +95,7 @@ public class model {
         return Math.sqrt(p*p*annual_volatility[i]*annual_volatility[i] + 
                 (1-p)*(1-p)*annual_volatility[j]*annual_volatility[j] + 
                 2*p*(1-p)*correlation_matrix[i][j]*
-                        annual_volatility[i]*annual_volatility[j]);
+                        annual_volatility[i]*annual_volatility[j])*100;
     }
 
     //return paired volatility for all percentages 0,1,2,...,99,100
@@ -107,25 +111,19 @@ public class model {
     double[] allReturns(String c1, String c2) {
         double[] ans = new double[101];
         for(int i = 0; i <= 100; i++) {
-            ans[i] = (annualAvgReturn(c1) * i/100.0) + (annualAvgReturn(c2) * (100-i)/100.0);
+            ans[i] = (annualAvgReturn(c1) * i) + (annualAvgReturn(c2) * (100-i));
         }
         return ans;
     }
 
     //the return value of a specific weighting c
-<<<<<<< HEAD
-	private double weightingReturn(double[] c) {
-		double ret = 0, w = 1;
-		for(int i = 0; i < companies-1; ++i) {
-			w -= c[i];
-=======
+
 	double weightingReturn(double[] c) {
 		double ret = 0;
 		for(int i = 0; i < companies; ++i) {
->>>>>>> cd4333ea10dc2a3b943dc77fbcbceba6298fea39
 			ret += annual_avg_return[i]*c[i];
 		}
-		return ret+w*annual_avg_return[companies-1];
+		return ret;
 	}
  
         //the volatility of a specific weighting c
@@ -210,21 +208,25 @@ public class model {
 		return c;
 	}
 
-	double[] learn_model(double cutoff) {
-		double[] c = new double[companies-1],cw;
+	double[] learnModel(double cutoff) {
+		double[] c = new double[companies-1],d=new double[companies-1];
 		double c_var = weightingVariance(c);
 		c[0] = -1;
 		for(int i = 0; i < 2000; ++i) {
-			cw = gradientDescent(cutoff,1000,0.05);
-			double cw_var = weightingVariance(cw);
+			d = gradientDescent(cutoff,1000,0.05);
+			double cw_var = weightingVariance(d);
 			if(c[0] == -1 || cw_var < c_var) {
 				c_var = cw_var;
-				c = cw;
+				c = d;
 			}
 		}
-		double sm = 0;
-		for(int i = 0; i < c.length; ++i) sm += c[i];
-		return c;
+                d=new double[companies];
+                d[companies-1] = 1;
+		for(int i = 0; i < companies-1; ++i) {
+                    d[i] = c[i];
+                    d[companies-1] -= d[i];
+                }
+		return d;
 	}
 
 	public static void main(String[] args) {
