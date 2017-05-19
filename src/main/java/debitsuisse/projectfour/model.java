@@ -252,10 +252,11 @@ public class model {
 		monthly_volatility = new double[companies];
 		for(int i = 0; i < companies; ++i)
 			for(int j = 0; j < months-1; ++j)
-				return_month[i][j] = (price[i][j+1] - price[i][j])/price[i][j]*100;
+				return_month[i][j] = (price[i][j+1] - price[i][j])/price[i][j];
 		for(int i = 0; i < companies; ++i) {
 			monthly_avg_return[i] = monthlyAvgReturn(i);
-			annual_avg_return[i] = Math.pow(1+monthly_avg_return[i]/100,12)*100-100;
+			annual_avg_return[i] = Math.pow(1+monthly_avg_return[i],12)-1;
+
 		}
 		for(int i = 0; i < companies; ++i) {
 			monthly_variance[i] = monthlyVariance(i);
