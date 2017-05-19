@@ -144,7 +144,7 @@ public class model {
 	}
 
 	//the variance of a specific weighting c
-	private double weightingVariance(double[] c) {
+	double weightingVariance(double[] c) {
 		double var = 0;
 		double w = 1;
 		for(int i = 0; i < companies-1; ++i) {

@@ -102,11 +102,10 @@ public class MoneyManagerController {
     //Jackson's portfolio returner
     public String highReturnLowVolatility(@RequestParam(value = "cutoff",
             defaultValue = "0.12") Double cutoff) {
-        double[] learnModel = m.learnModel(cutoff);
+        double[] learnModel = m.learnModel(cutoff);    
         JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
         String[] names = m.getNames();
         JsonObjectBuilder jsonObject = Json.createObjectBuilder();
-        Arrays.sort(learnModel);
         for(int i = 0; i < learnModel.length; i++) {
             arrayBuilder.add(Json.createObjectBuilder().add(names[i], 
                             learnModel[i]*100));    
