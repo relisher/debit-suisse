@@ -4,10 +4,12 @@ import java.util.Scanner;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 
 public class model {
 	
 	//given data
+	HashMap<String,Integer> indices;
 	int companies, months;
 	String[] names;
 	double[][] price;
@@ -60,45 +62,20 @@ public class model {
 	}
 
 	double ratio(String c1, String c2, double p) {
-		int i=0,j=0;
-		for(int k = 0; k < companies; ++k) {
-			if(names[k].equals(c1))
-				i = k;
-			if(names[k].equals(c2))
-				j = k;
-		}
+		int i=indices.get(c1),j=indices.get(c2);
 		return Math.sqrt(p*p*annual_volatility[i] + (1-p)*(1-p)*annual_volatility[j] + 2*p*(1-p)*correlation_matrix[i][j]*annual_volatility[i]*annual_volatility[j]);
 	}
 
-	double get_w(double[] c) {
-		double w = 1;
-		for(double r : c)
-			w -= r;
-		return w;
-	}
-
-	void project(double[] c) {
-		for(int i = 0; i < companies-1; ++i)
-			if(c[i] < 0)
-				c[i] = 0;
-		double sm = 0;
-		for(int i = 0; i < companies-1; ++i)
-			sm += c[i];
-		if(sm > 1)
-			for(int i = 0; i < companies-1; ++i)
-				c[i] /= sm;
+	double[] allRatios(String c1, String c2) {
+		double[] ans = new double[101];
+		for(int i = 0; i <= 100; ++i) {
+			ans[i] = ratio(c1,c2,i/100.0);
+		}
+		return ans;
 	}
 
 	double[] gradientDescent(double[] r, double[] v, int steps, double alpha) {
-		//generate initial configuration
 		double[] c = new double[companies-1];
-		// double s = Math.random();
-		// for(int i = 0; i < n-1; ++i) {
-		// 	c[i] = Math.random();
-		// 	s += c[i];
-		// }
-		// for(int i = 0; i < n-1; ++i)
-		// 	c[i] /= s;
 		for(; steps>0; --steps) {
 			double w = get_w(c);
 			for(int j = 0; j < companies-1; ++j)
@@ -128,9 +105,11 @@ public class model {
 			for(int i = 0; i < companies; ++i) {
 				for(int j = 0; j < months; ++j) {
 					names[i] = s.next();
+
 					s.next();
 					price[i][j] = s.nextDouble();
 				}
+				indices.put(names[i],i);
 			}
 		}
 		catch (IOException e) {
