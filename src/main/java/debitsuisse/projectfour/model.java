@@ -129,7 +129,9 @@ public class model {
 		double w = 1;
 		for(int i = 0; i < companies-1; ++i) {
 			w -= c[i];
-			if(c[i] < 0 || w < 0) return false;
+			if(c[i] < 0 || w < 0) {
+				return false;
+			}
 			payoff += annual_avg_return[i]*c[i];
 		}
 		payoff += w*annual_avg_return[companies-1];
@@ -158,7 +160,7 @@ public class model {
 
 	//sample randomly and gradient descent to find minima
 	double[] gradientDescent(double cutoff, int steps, double alpha) {
-		double[] c = new double[companies-1],cs = new double[companies-1];
+		double[] c = new double[companies-1],d = new double[companies-1];
 		//find feasible solution
 		int mx = 0;
 		for(int i = 1; i < annual_avg_return.length; ++i) {
@@ -187,13 +189,14 @@ public class model {
 		double best_var = weightingVariance(c);
 		for(int i = steps; i > 0; --i) {
 			double rate = alpha;
-			for(int j = 0; j < companies-1; ++j)
-				cs[j] = c[j] + rate*(Math.random()*2-1);
-			if(weightingOk(cs,cutoff)) {
-				double var = weightingVariance(cs);
+			for(int j = 0; j < companies-1; ++j) {
+				d[j] = c[j] + rate*(Math.random()*2-1);
+			}
+			if(weightingOk(d,cutoff)) {
+				double var = weightingVariance(d);
 				if(var < best_var) {
 					best_var = var;
-					c = cs;
+					c = d;
 				}
 			}
 		}
@@ -206,15 +209,13 @@ public class model {
 		double c_var = weightingVariance(c);
 		c[0] = -1;
 		for(int i = 0; i < 2000; ++i) {
-			cw = gradientDescent(cutoff,1000,0.05);
-			double cw_var = weightingVariance(cw);
-			if(c[0] == -1 || cw_var < c_var) {
-				c_var = cw_var;
-				c = cw;
+			d = gradientDescent(cutoff,1000,0.05);
+			double d_var = weightingVariance(d);
+			if(c[0] == -1 || d_var < c_var) {
+				c_var = d_var;
+				c = d;
 			}
 		}
-		double sm = 0;
-		for(int i = 0; i < c.length; ++i) sm += c[i];
 		return c;
 	}
 
@@ -266,7 +267,5 @@ public class model {
 			annual_volatility[i] = Math.sqrt(annual_variance[i]);
 		}
 		correlation_matrix = correlationMatrix();
-
-		//learn_model(0.12);
 	}
 }
