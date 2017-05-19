@@ -3,7 +3,6 @@ package debitsuisse.projectfour;
 import java.util.Scanner;
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +31,6 @@ public class model {
 	}
         
         public double annualAvgReturn(String c1) {
-            System.out.println(c1 + " this is the value");
             int i=indices.get(c1);
             double d = 0;
             for(int j = 0; j < months-1; ++j) {
@@ -73,9 +71,12 @@ public class model {
 	}
 
 	double ratio(String c1, String c2, double p) {
-		int i=indices.get(c1),j=indices.get(c2);
-		return Math.sqrt(p*p*annual_volatility[i] + (1-p)*(1-p)*annual_volatility[j] + 2*p*(1-p)*correlation_matrix[i][j]*annual_volatility[i]*annual_volatility[j]);
-	}
+            int i=indices.get(c1),j=indices.get(c2);
+            return Math.sqrt(p*p*annual_volatility[i]*annual_volatility[i] + 
+                    (1-p)*(1-p)*annual_volatility[j]*annual_volatility[j] + 
+                    2*p*(1-p)*correlation_matrix[i][j]*
+                            annual_volatility[i]*annual_volatility[j]);
+        }
 
 	double[] allRatios(String c1, String c2) {
 		double[] ans = new double[101];
@@ -84,6 +85,14 @@ public class model {
 		}
 		return ans;
 	}
+        
+        double[] allReturns(String c1, String c2) {
+            double[] ans = new double[101];
+            for(int i = 0; i <= 100; i++) {
+                ans[i] = (annualAvgReturn(c1) * i/100.0) + (annualAvgReturn(c2) * (100-1)/100.0);
+            }
+            return ans;
+        }
 
 	/*double[] gradientDescent(double[] r, double[] v, int steps, double alpha) {
 		double[] c = new double[companies-1];
@@ -145,13 +154,5 @@ public class model {
 			annual_volatility[i] = monthly_volatility[i]*Math.sqrt(12);
 		}
 		correlation_matrix = correlationMatrix();
-
-		DecimalFormat df = new DecimalFormat(".00");
-
-		for(int i = 0; i < companies; ++i) {
-			for(int j = 0; j < companies; ++j) {
-				System.out.println(names[i] + ", " + names[j] + " -> " + df.format(correlation_matrix[i][j]));
-			}
-		}
 	}
 }
