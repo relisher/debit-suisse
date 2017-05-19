@@ -204,8 +204,8 @@ public class model {
 	}
 
 	//learn weightings with return at least cutoff
-	double[] learn_model(double cutoff) {
-		double[] c = new double[companies-1],cw;
+	double[] learnModel(double cutoff) {
+		double[] c = new double[companies-1],d;
 		double c_var = weightingVariance(c);
 		c[0] = -1;
 		for(int i = 0; i < 2000; ++i) {
@@ -216,7 +216,13 @@ public class model {
 				c = d;
 			}
 		}
-		return c;
+		d = new double[companies];
+		d[companies-1] = 1;
+		for(int i = 0; i < companies-2; ++i) {
+			d[i] = c[i];
+			d[companies-1] -= c[i];
+		}
+		return d;
 	}
 
 	public static void main(String[] args) {
