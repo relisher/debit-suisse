@@ -3,6 +3,7 @@ package debitsuisse.projectfour;
 import java.util.Scanner;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 public class model {
 	
@@ -51,7 +52,7 @@ public class model {
 				for(int k = 0; k < months-1; ++k) {
 					M[i][j] += V[i][k] * V[j][k];
 				}
-				M[i][j] /= monthly_volatility[i]*monthly_volatility[j];
+				M[i][j] /= (months-1)*monthly_volatility[i]*monthly_volatility[j];
 				M[j][i] = M[i][j];
 			}
 		}
@@ -151,16 +152,15 @@ public class model {
 		for(int i = 0; i < companies; ++i) {
 			monthly_variance[i] = monthlyVariance(i);
 			monthly_volatility[i] = Math.sqrt(monthly_variance[i]);
-			annual_volatility[i] = Math.sqrt(monthly_variance[i]*12);
+			annual_volatility[i] = monthly_volatility[i]*Math.sqrt(12);
 		}
 		correlation_matrix = correlationMatrix();
 
 		DecimalFormat df = new DecimalFormat(".00");
 
-
 		for(int i = 0; i < companies; ++i) {
 			for(int j = 0; j < companies; ++j) {
-				System.out.println(names[i] + ", " + names[j] + " -> "df.format(correlation_matrix[i][j]));
+				System.out.println(names[i] + ", " + names[j] + " -> " + df.format(correlation_matrix[i][j]));
 			}
 		}
 	}
