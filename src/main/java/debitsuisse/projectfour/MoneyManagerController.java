@@ -19,12 +19,25 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author arelin
  */
+
+@CrossOrigin(origins = "*")
 @RestController
 public class MoneyManagerController {
     
     model m = new model();
-
-    @CrossOrigin(origins = "*")
+    
+    @RequestMapping(method = {RequestMethod.GET}, value="/getStockNames")
+    public String stockNames() {
+        String[] names = m.getNames();
+        JsonArrayBuilder createArrayBuilder = Json.createArrayBuilder();
+        for(String s : names) {
+            JsonObjectBuilder add = Json.createObjectBuilder().add("name", s);
+            createArrayBuilder.add(add);
+        }
+        return Json.createObjectBuilder().add("companies", createArrayBuilder)
+                .build().toString();      
+    }
+    
     @RequestMapping(method = {RequestMethod.GET}, value="/getSingleMethod")
     public String byStockBasicInformation(@RequestParam(value = "company", 
             defaultValue="AAPL") String stock) {
@@ -49,27 +62,32 @@ public class MoneyManagerController {
                 
     }
     
-    @CrossOrigin(origins = "*")
     @RequestMapping(method = {RequestMethod.GET}, value="/getProportion")
     public String stockVolatilityReturn(@RequestParam(value = "proportion", 
-            defaultValue="50.0") Double userCash)
+            defaultValue="50.0") Double userCash, 
+            @RequestParam(value = "companyOne", 
+            defaultValue="AAPL") String companyOne, 
+            @RequestParam(value = "companyTwo", 
+            defaultValue="F") String companyTwo)
     {
         double applRatio = (userCash) / 100.0;
-        double income = (m.annualAvgReturn("AAPL") * applRatio) + (m.annualAvgReturn("F") * (1-applRatio));
+        double income = (m.annualAvgReturn(companyOne) * applRatio) + (m.annualAvgReturn(companyTwo) * (1-applRatio));
         return Json.createObjectBuilder()
-            .add("aVol", Double.toString(m.ratio("AAPL", "F", applRatio)))
+            .add("aVol", Double.toString(m.ratio(companyOne, companyTwo, applRatio)))
             .add("aRet", Double.toString(income))
             .build()
             .toString();
     }
     
-    @CrossOrigin(origins = "*")
     @RequestMapping(method = {RequestMethod.GET}, value="/getAllValues")
-    public String overallVolatilityReturn() 
+    public String overallVolatilityReturn(@RequestParam(value = "companyOne", 
+            defaultValue="AAPL") String companyOne, 
+            @RequestParam(value = "companyTwo", 
+            defaultValue="F") String companyTwo) 
     {  
         return Json.createObjectBuilder()
-            .add("aVol", Arrays.toString(m.allRatios("F", "AAPL")))
-            .add("aRet", Arrays.toString(m.allReturns("F", "AAPL")))
+            .add("aVol", Arrays.toString(m.allRatios(companyTwo, companyOne)))
+            .add("aRet", Arrays.toString(m.allReturns(companyTwo, companyOne)))
             .build()
             .toString();        
     }
