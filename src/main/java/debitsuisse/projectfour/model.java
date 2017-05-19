@@ -217,7 +217,7 @@ public class model {
 		}
 		d = new double[companies];
 		d[companies-1] = 1;
-		for(int i = 0; i < companies-2; ++i) {
+		for(int i = 0; i < companies-1; ++i) {
 			d[i] = c[i];
 			d[companies-1] -= c[i];
 		}
