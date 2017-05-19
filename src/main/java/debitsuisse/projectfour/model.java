@@ -163,6 +163,7 @@ public class model {
 		return var;
 	}
 
+	//perform mixed stochastic/differential gradient descent
 	double[] gradientDescent(double cutoff, int steps, double alpha) {
 		double  p = 0.4;
 		double[] c = new double[companies-1],cs = new double[companies-1];
