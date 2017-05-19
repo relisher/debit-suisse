@@ -238,13 +238,9 @@ public class model {
 		return d;
 	}
 
-	public static void main(String[] args) {
-		model m = new model();
-	}
-
 	public model() {
 		try {
-			Scanner s = new Scanner(new File("data 2.txt"));
+			Scanner s = new Scanner(new File("data.txt"));
 			companies = s.nextInt();
 			months = s.nextInt();
 
