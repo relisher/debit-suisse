@@ -22,13 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
  * @author arelin
  */
 
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*") //allow this to be accessible from anywhere
 @RestController
 public class MoneyManagerController {
     
-    model m = new model();
+    model m = new model(); //do basic calculations first, don't do it every time
     
-    @RequestMapping(method = {RequestMethod.GET}, value="/getStockNames")
+    @RequestMapping(method = {RequestMethod.GET}, value="/getStockNames") 
+    //list of names to populate frontend
     public String stockNames() {
         String[] names = m.getNames();
         JsonArrayBuilder createArrayBuilder = Json.createArrayBuilder();
@@ -39,7 +40,8 @@ public class MoneyManagerController {
                 .build().toString();      
     }
     
-    @RequestMapping(method = {RequestMethod.GET}, value="/getSingleMethod")
+    @RequestMapping(method = {RequestMethod.GET}, value="/getSingleMethod") 
+    //gets all information associated with a single company
     public String byStockBasicInformation(@RequestParam(value = "company", 
             defaultValue="AAPL") String stock) {
         
@@ -64,6 +66,7 @@ public class MoneyManagerController {
     }
     
     @RequestMapping(method = {RequestMethod.GET}, value="/getProportion")
+    //gets the volatility and return based upon which percent of money is companyOne vs companyTwo
     public String stockVolatilityReturn(@RequestParam(value = "proportion", 
             defaultValue="50.0") Double userCash, 
             @RequestParam(value = "companyOne", 
@@ -82,6 +85,7 @@ public class MoneyManagerController {
     }
     
     @RequestMapping(method = {RequestMethod.GET}, value="/getAllValues")
+    //returns volatility and return values from a 0-100% of proportion of companyOne vs companyB
     public String overallVolatilityReturn(@RequestParam(value = "companyOne", 
             defaultValue="AAPL") String companyOne, 
             @RequestParam(value = "companyTwo", 
@@ -95,13 +99,14 @@ public class MoneyManagerController {
     }
     
     @RequestMapping(method = {RequestMethod.GET}, value="/getSemiRandomizedPortfolio")
+    //Jackson's portfolio returner
     public String highReturnLowVolatility(@RequestParam(value = "cutoff",
             defaultValue = "0.12") Double cutoff) {
         double[] learnModel = m.learnModel(cutoff);
         JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
         String[] names = m.getNames();
         JsonObjectBuilder jsonObject = Json.createObjectBuilder();
-        
+        Arrays.sort(learnModel);
         for(int i = 0; i < learnModel.length; i++) {
             arrayBuilder.add(Json.createObjectBuilder().add(names[i], 
                             learnModel[i]*100));    
@@ -114,6 +119,4 @@ public class MoneyManagerController {
                 .add("pu", arrayBuilder)
                 .build().toString();
     }
-    
-   
 }
