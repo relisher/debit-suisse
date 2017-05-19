@@ -5,6 +5,9 @@
  */
 package debitsuisse.projectfour;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -31,8 +34,7 @@ public class MoneyManagerController {
         String[] names = m.getNames();
         JsonArrayBuilder createArrayBuilder = Json.createArrayBuilder();
         for(String s : names) {
-            JsonObjectBuilder add = Json.createObjectBuilder().add("name", s);
-            createArrayBuilder.add(add);
+            createArrayBuilder.add(Json.createObjectBuilder().add("name", s));
         }
         return Json.createObjectBuilder().add("companies", createArrayBuilder)
                 .build().toString();      
@@ -91,5 +93,27 @@ public class MoneyManagerController {
             .build()
             .toString();        
     }
+    
+    @RequestMapping(method = {RequestMethod.GET}, value="/getSemiRandomizedPortfolio")
+    public String highReturnLowVolatility(@RequestParam(value = "cutoff",
+            defaultValue = "0.12") Double cutoff) {
+        double[] learnModel = m.learnModel(cutoff);
+        JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+        String[] names = m.getNames();
+        JsonObjectBuilder jsonObject = Json.createObjectBuilder();
+        
+        for(int i = 0; i < learnModel.length; i++) {
+            arrayBuilder.add(Json.createObjectBuilder().add(names[i], 
+                            learnModel[i]*100));    
+        }
+        NumberFormat formatter = new DecimalFormat("#0.00");  
+        double avgProfit = m.weightingReturn(learnModel);
+        return jsonObject.add("aar", avgProfit)
+                .add("av", m.weightingVolatility(learnModel))
+                .add("ep", formatter.format(avgProfit * 10000000))
+                .add("pu", arrayBuilder)
+                .build().toString();
+    }
+    
    
 }

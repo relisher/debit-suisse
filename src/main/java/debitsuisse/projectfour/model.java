@@ -113,15 +113,26 @@ public class model {
     }
 
     //the return value of a specific weighting c
+<<<<<<< HEAD
 	private double weightingReturn(double[] c) {
 		double ret = 0, w = 1;
 		for(int i = 0; i < companies-1; ++i) {
 			w -= c[i];
+=======
+	double weightingReturn(double[] c) {
+		double ret = 0;
+		for(int i = 0; i < companies; ++i) {
+>>>>>>> cd4333ea10dc2a3b943dc77fbcbceba6298fea39
 			ret += annual_avg_return[i]*c[i];
 		}
 		return ret+w*annual_avg_return[companies-1];
 	}
-
+ 
+        //the volatility of a specific weighting c
+	public double weightingVolatility(double[] c) {
+		return Math.sqrt(weightingVariance(c));
+	}
+        
 	//does the weighting fit the constraints?
 	private boolean weightingOk(double[] c, double cutoff) {
 		double payoff = 0;
