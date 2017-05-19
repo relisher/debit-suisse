@@ -109,54 +109,54 @@ public class model {
             return ans;
         }
 
-	private double sample_return(double[] r, double[] c) {
+	private double sample_return(double[] c) {
 		double ret = 0, w = 1;
 		for(int i = 0; i < companies-1; ++i) {
 			w -= c[i];
-			ret += r[i]*c[i];
+			ret += annual_avg_return[i]*c[i];
 		}
-		return ret+w*r[companies-1];
+		return ret+w*annual_avg_return[companies-1];
 	}
 
-	private boolean sample_ok(double[] r, double[] c, double cutoff) {
+	private boolean sample_ok(double[] c, double cutoff) {
 		double payoff = 0;
 		double w = 1;
 		for(int i = 0; i < companies-1; ++i) {
 			w -= c[i];
 			if(c[i] < 0 || w < 0) return false;
-			payoff += r[i]*c[i];
+			payoff += annual_avg_return[i]*c[i];
 		}
-		payoff += w*r[companies-1];
+		payoff += w*annual_avg_return[companies-1];
 		return payoff >= cutoff;
 	}
 
-	private double sample_variance(double[] v, double[] c, double cutoff) {
+	private double sample_variance(double[] c) {
 		double var = 0;
 		double w = 1;
 		for(int i = 0; i < companies-1; ++i) {
-			var += c[i]*c[i]*v[i];
+			var += c[i]*c[i]*annual_variance[i];
 			w -= c[i];
 		}
-		var += w*w*v[companies-1];
+		var += w*w*annual_variance[companies-1];
 		for(int i = 1; i < companies-1; ++i) {
 			for(int j = 0; j < i; ++j) {
-				var += 2*c[i]*c[j]*Math.sqrt(v[i]*v[j])*correlation_matrix[i][j];
+				var += 2*c[i]*c[j]*Math.sqrt(annual_variance[i]*annual_variance[j])*correlation_matrix[i][j];
 			}
 		}
 		for(int j = 0; j < companies-1; ++j)
-			var += 2*c[j]*w*Math.sqrt(v[j]*v[companies-1])*correlation_matrix[j][companies-1];
+			var += 2*c[j]*w*Math.sqrt(annual_variance[j]*annual_variance[companies-1])*correlation_matrix[j][companies-1];
 		return var;
 	}
 
-	double[] gradientDescent(double[] r, double[] v, double cutoff, int steps, double alpha) {
+	double[] gradientDescent(double cutoff, int steps, double alpha) {
 		double[] c = new double[companies-1],cs = new double[companies-1];
 		//find feasible solution
 		int mx = 0;
-		for(int i = 1; i < r.length; ++i) {
-			if(r[mx] < r[i])
+		for(int i = 1; i < annual_avg_return.length; ++i) {
+			if(annual_avg_return[mx] < annual_avg_return[i])
 				mx = i;
 		}
-		if(r[mx] < cutoff) {
+		if(annual_avg_return[mx] < cutoff) {
 			//no solutions exist
 			Arrays.fill(c,-1);
 			return c;
@@ -171,17 +171,17 @@ public class model {
 			for(int i = 0; i < companies-1; ++i) {
 				c[i] *= s/w;
 			}
-		} while(!sample_ok(r,c,cutoff));
+		} while(!sample_ok(c,cutoff));
 
 
 		//local search
-		double best_var = sample_variance(v,c,cutoff);
+		double best_var = sample_variance(c);
 		for(int i = steps; i > 0; --i) {
 			double rate = alpha;
 			for(int j = 0; j < companies-1; ++j)
 				cs[j] = c[j] + rate*(Math.random()*2-1);
-			if(sample_ok(r,cs,cutoff)) {
-				double var = sample_variance(v,cs,cutoff);
+			if(sample_ok(cs,cutoff)) {
+				double var = sample_variance(cs);
 				if(var < best_var) {
 					best_var = var;
 					c = cs;
@@ -193,18 +193,17 @@ public class model {
 
 	double[] learn_model(double cutoff) {
 		double[] c = new double[companies-1],cw;
-		double c_var = sample_variance(annual_variance,c,cutoff);
+		double c_var = sample_variance(c);
 		c[0] = -1;
 		for(int i = 0; i < 2000; ++i) {
-			cw = gradientDescent(annual_avg_return,annual_variance,cutoff,1000,0.05);
-			double cw_var = sample_variance(annual_variance,cw,cutoff);
+			cw = gradientDescent(cutoff,1000,0.05);
+			double cw_var = sample_variance(cw);
 			// System.out.println("Volatility: " + Math.sqrt(cw_var));
 			if(c[0] == -1 || cw_var < c_var) {
 				c_var = cw_var;
 				c = cw;
 			}
 		}
-		System.out.println(Arrays.toString(c));
 		double sm = 0;
 		for(int i = 0; i < c.length; ++i) sm += c[i];
 		return c;
