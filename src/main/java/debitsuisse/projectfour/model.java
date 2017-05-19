@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class model {
-	
 	//given data
 	Map<String,Integer> indices = new HashMap<>();;
 	int companies, months;
@@ -164,8 +163,8 @@ public class model {
 		return var;
 	}
 
-	//sample randomly and gradient descent to find minima
 	double[] gradientDescent(double cutoff, int steps, double alpha) {
+		double  p = 0.4;
 		double[] c = new double[companies-1],cs = new double[companies-1];
 		//find feasible solution
 		int mx = 0;
@@ -195,8 +194,18 @@ public class model {
 		double best_var = weightingVariance(c);
 		for(int i = steps; i > 0; --i) {
 			double rate = alpha;
-			for(int j = 0; j < companies-1; ++j)
-				cs[j] = c[j] + rate*(Math.random()*2-1);
+			for(int j = 0; j < companies-1; ++j) {
+				double wt = c[j], w = 1;
+				for(int k = 0; k < companies-1; ++k) {
+					w -= c[k];
+					if(k==i) continue;
+					wt += c[k]*correlation_matrix[j][k]*annual_volatility[k];
+				}
+				wt -= w*correlation_matrix[j][companies-1]*annual_volatility[companies-1];
+				wt *= annual_volatility[j];
+
+				cs[j] = c[j] + rate*(-p*wt + (1-p)*(Math.random()*2-1));
+			}
 			if(weightingOk(cs,cutoff)) {
 				double var = weightingVariance(cs);
 				if(var < best_var) {
@@ -213,19 +222,19 @@ public class model {
 		double c_var = weightingVariance(c);
 		c[0] = -1;
 		for(int i = 0; i < 2000; ++i) {
-			d = gradientDescent(cutoff,1000,0.05);
+			d = gradientDescent(cutoff,500,0.8);
 			double cw_var = weightingVariance(d);
 			if(c[0] == -1 || cw_var < c_var) {
 				c_var = cw_var;
 				c = d;
 			}
 		}
-                d=new double[companies];
+                d = new double[companies];
                 d[companies-1] = 1;
 		for(int i = 0; i < companies-1; ++i) {
-                    d[i] = c[i];
-                    d[companies-1] -= d[i];
-                }
+            d[i] = c[i];
+            d[companies-1] -= d[i];
+        }
 		return d;
 	}
 
@@ -235,7 +244,7 @@ public class model {
 
 	public model() {
 		try {
-			Scanner s = new Scanner(new File("data.txt"));
+			Scanner s = new Scanner(new File("data 2.txt"));
 			companies = s.nextInt();
 			months = s.nextInt();
 
@@ -277,7 +286,5 @@ public class model {
 			annual_volatility[i] = Math.sqrt(annual_variance[i]);
 		}
 		correlation_matrix = correlationMatrix();
-
-		//learn_model(0.12);
 	}
 }
