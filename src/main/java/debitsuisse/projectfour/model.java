@@ -32,14 +32,14 @@ public class model {
         
         public double annualAvgReturn(String c1) {
             int i=indices.get(c1);
-            double d = 0;
-            for(int j = 0; j < months-1; ++j) {
-			d += return_month[i][j];
-            }
-            return (d / (months-1)) * 12;
+            return monthlyAvgReturn(i) * 12;
+        }
+        
+        public String[] getNames() {
+            return names;
         }
 
-	double monthlyVariance(int i) {
+	public double monthlyVariance(int i) {
 		double var = 0;
 		double mar = monthly_avg_return[i];
 		for(int j = 0; j < months-1; ++j) {
@@ -48,6 +48,19 @@ public class model {
 		}
 		return var / months-1;
 	}
+        
+        public double[][] getCorrelationMatrix() {
+            return correlation_matrix;
+        }
+        
+        public double annualVariance(String c1) {
+            int i=indices.get(c1);
+            return monthlyVariance(i) * Math.sqrt(12.0);
+        }
+        
+        public int getCompanyValue(String c1) {
+            return indices.get(c1);
+        }
 
 	double[][] correlationMatrix() {
 		double[][] V = new double[companies][months-1];

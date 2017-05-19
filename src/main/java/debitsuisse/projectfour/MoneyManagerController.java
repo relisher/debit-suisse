@@ -8,6 +8,7 @@ package debitsuisse.projectfour;
 import java.util.Arrays;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,10 +23,30 @@ import org.springframework.web.bind.annotation.RestController;
 public class MoneyManagerController {
     
     model m = new model();
-    
-    @RequestMapping("/getData")
-    public String managerData() {
-       return "test";
+
+    @CrossOrigin(origins = "*")
+    @RequestMapping(method = {RequestMethod.GET}, value="/getSingleMethod")
+    public String byStockBasicInformation(@RequestParam(value = "company", 
+            defaultValue="AAPL") String stock) {
+        
+        JsonArrayBuilder createArrayBuilder = Json.createArrayBuilder();
+        String[] names = m.getNames();
+        double[][] correlationMatrix = m.getCorrelationMatrix();
+        for(int i = 0; i < names.length; i++) {
+            JsonObjectBuilder add = 
+                    Json.createObjectBuilder().add(names[i], 
+                            correlationMatrix[m.getCompanyValue(stock)][i]);
+            createArrayBuilder.add(add);
+
+        }
+        
+        return Json.createObjectBuilder()
+                .add("mar", Double.toString(m.monthlyAvgReturn(m.getCompanyValue(stock))))
+                .add("aar", Double.toString(m.annualAvgReturn(stock)))
+                .add("mv", Double.toString(m.monthlyVariance(m.getCompanyValue(stock))))
+                .add("av", Double.toString(m.annualVariance(stock)))
+                .add("cf", createArrayBuilder).build().toString();
+                
     }
     
     @CrossOrigin(origins = "*")
@@ -47,8 +68,8 @@ public class MoneyManagerController {
     public String overallVolatilityReturn() 
     {  
         return Json.createObjectBuilder()
-            .add("aVol", Arrays.toString(m.allRatios("AAPL", "F")))
-            .add("aRet", Arrays.toString(m.allReturns("AAPL", "F")))
+            .add("aVol", Arrays.toString(m.allRatios("F", "AAPL")))
+            .add("aRet", Arrays.toString(m.allReturns("F", "AAPL")))
             .build()
             .toString();        
     }
