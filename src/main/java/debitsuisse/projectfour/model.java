@@ -196,16 +196,10 @@ public class model {
 		for(int i = steps; i > 0; --i) {
 			double rate = alpha;
 			for(int j = 0; j < companies-1; ++j) {
-				double wt = c[j], w = 1;
-				for(int k = 0; k < companies-1; ++k) {
-					w -= c[k];
-					if(k==i) continue;
-					wt += c[k]*correlation_matrix[j][k]*annual_volatility[k];
-				}
-				wt -= w*correlation_matrix[j][companies-1]*annual_volatility[companies-1];
-				wt *= annual_volatility[j];
-
-				cs[j] = c[j] + rate*(-p*wt + (1-p)*(Math.random()*2-1));
+				double ud = correlation_matrix[j][companies-1]*annual_volatility[j]*annual_volatility[companies-1];
+				ud -= correlation_matrix[j][j]*annual_volatility[j]*annual_volatility[j];
+				ud *= c[j]*c[j];
+				cs[j] = c[j] + rate*(-p*ud + (1-p)*(Math.random()*2-1));
 			}
 			if(weightingOk(cs,cutoff)) {
 				double var = weightingVariance(cs);
